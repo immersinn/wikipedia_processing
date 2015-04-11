@@ -7,9 +7,8 @@
 import sys
 
 sys.path.append('/Users/immersinn/Gits/')
-
 from nlppipeline.dbconns import connectMon
-from nlppipeline.text_norm.wikiprep.wikiXMLParse\
+from wikipedia_processing.wikiprep.wikiXMLParse\
      import populateWikiMDB
 
 

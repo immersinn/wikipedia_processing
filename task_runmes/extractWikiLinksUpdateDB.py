@@ -3,9 +3,9 @@ import sys
 import time
 
 sys.path.append('/Users/immersinn/Gits/')
-from nlppipeline.text_norm.wikiprep.wikiMDBPageIterator \
+from wikipedia_processing.wikiprep.wikiMDBPageIterator \
      import WikiPageIterator, getWikiMDBConn
-from nlppipeline.text_norm.wikiprep.basicLinkExt \
+from wikipedia_processing.wikiprep.basicLinkExt \
      import extractWikiLinksFromDoc
 
 

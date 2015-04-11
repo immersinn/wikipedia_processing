@@ -4,7 +4,7 @@ import sys
 import re
 
 sys.path.append('/Users/immersinn/Gits/')
-from nlppipeline.text_norm.wikiprep import wikiDocProcess
+from wikipedia_processing.wikiprep import wikiDocProcess
 
 
 def extractWikiLinksFromDoc(doc):

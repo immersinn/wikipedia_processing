@@ -6,28 +6,26 @@ from dbinterface_python.dbconns import connectMon
 
 class WikiPageIteratorAll:
     """
-    Connects to Wiki MDB; Creates a Cursor itterable over all docs;
+    Connects to Wiki MDB; Creates a Cursor itterable over all docs up to limit;
     """
 
-    def __init__(self, limit=100):
+    def __init__(self, limit=100, skip=0,
+                 no_cursor_timeout=False):
         self.conn = getWikiMDBConn()
-        self.conn.query(limit=limit,
-                        skip=500000)
+        self.cursor = self.conn.query(limit=limit, skip=0)
         self.current = 0
-        self.high = self.conn.LastQLen
-
+        self.high = self.cursor.count(with_limit_and_skip=True)
+        
 
     def __iter__(self):
         return self
 
 
     def next(self):
-        if self.current > self.high:
+        if self.current >= self.high:
             raise StopIteration
         self.current += 1
-        if self.current==self.high:
-            raise StopIteration
-        return self.conn.LastQ.next()
+        return self.cursor.next()
     
 
 class WikiPageIterator(WikiPageIteratorAll):
@@ -45,14 +43,14 @@ class WikiPageIterator(WikiPageIteratorAll):
                 self.current += 1
                 if self.current==self.high:
                     raise StopIteration
-                doc = self.conn.LastQ.next()
+                doc = self.cursor.next()
                 if not badpage(doc):
                     good_doc = doc
                     good_doc_status = True
             return good_doc
 
 
-def getWikiMDBConn(coll=None):
+def getWikiMDBConn(coll=''):
     """Establishes connection to MDB wiki collection"""
     
     wikimdb = connectMon.MongoConn()

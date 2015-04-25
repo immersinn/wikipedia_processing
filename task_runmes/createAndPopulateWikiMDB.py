@@ -7,10 +7,12 @@
 import sys
 
 sys.path.append('/Users/immersinn/Gits/')
-from nlppipeline.dbconns import connectMon
+from dbinterface_python.dbconns import connectMon
 from wikipedia_processing.wikiprep.wikiXMLParse\
      import populateWikiMDB
 
+
+default_wiki_xml_path = \'/Users/immersinn/Data/WebDataDumps/enwiki-latest-pages-articles.xml'
 
 def createAndReturnWikiMDB():
     wikimdb = connectMon.MongoConn()
@@ -29,6 +31,7 @@ def main():
     wikimdb_handle = createAndReturnWikiMDB()
     print('Enter path to WikiXML file:')
     file_path = input()
+    file_path = file_path if file_path else default_wiki_xml_path
     populateWikiMDB(wikimdb_handle, file_path, max_count=1000)
 
 

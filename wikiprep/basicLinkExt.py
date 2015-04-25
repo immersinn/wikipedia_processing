@@ -11,8 +11,7 @@ def extractWikiLinksFromDoc(doc):
     """
     Pass in a Wikipedia article (a 'doc') in str or unicode format.
     This code splits the doc into sections, filters out "junk" sections,
-    and extracts the links to other Wikipedia pages / coente from the
-    page.
+    and extracts the links to other Wikipedia pages from the page.
 
     A dictionary of links is returned.  Each key is a section.  Each
     value is a list of dictionaries for links in the section. Each link

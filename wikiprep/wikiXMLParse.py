@@ -15,7 +15,7 @@ class populateWikiMDB():
 
     def __init__(self, mdb_obj, file_path, max_count=-1):
         self.mdb_obj = mdb_obj
-        self.fn = file_path # '/Users/immersinn/Data/WebDataDumps/enwiki-latest-pages-articles.xml'
+        self.fn = file_path
         self.createFileHandle()
         self.findFirstPage()
         self.eof = False

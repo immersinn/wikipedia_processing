@@ -1,12 +1,16 @@
 
 import sys
 import time
+import pickle
 
 sys.path.append('/Users/immersinn/Gits/')
 from wikipedia_processing.wikiprep.wikiMDBPageIterator \
      import WikiPageIterator, getWikiMDBConn
 from wikipedia_processing.wikiprep.basicLinkExt \
      import extractWikiLinksFromDoc
+
+pkl_file_name = \
+              '/Users/immersinn/Gits/wikipedia_processing/task_runmes/extractWikiLinksUpdateDB_errors.pkl'
 
 
 def createDocToFromList(doc_name, doc_links, linkFilter):
@@ -27,28 +31,40 @@ def createDocToFromList(doc_name, doc_links, linkFilter):
 
 
 def main(max_pages):
-    print("Making connection to Mongo Wiki DB...")
-    wikiMDBCon = getWikiMDBConn()
-    print("Iterating over documents for analysis...")
-    wi = WikiPageIterator(limit=max_pages)
-    count = 0
-    for doc in wi:
-        if count%1000==0:
-            title = doc['title']
-            print("At %s, doc number %s" % (title, count))
-        count += 1
-        doc_id = doc['_id']
-        output = extractWikiLinksFromDoc(doc)
-        doc_to_from = createDocToFromList(doc['title'],
-                                          output['links'],
-                                          lambda x: filter(None, x))
-        doc_to_from = {i:j for i,j in enumerate(doc_to_from)}
-        # mycollection.update({'_id':mongo_id},
-        #                     {"$set": post},
-        #                     upsert=False)
-##        wikiMDBCon.coll.update({'_id':doc_id},
-##                               {"$set": \
-##                                {'to_from_wikiLinks':doc_to_from}})
+    try:
+        errs = []
+        print("Making connection to Mongo Wiki DB, link coll...")
+        wikiLinkMDBCon = getWikiMDBConn(coll='wikiToWikiLinks')
+        print("Iterating over documents for analysis...")
+        wi = WikiPageIterator(limit=max_pages, no_cursor_timeout=True)
+        count = 0
+        for doc in wi:
+            if count % 1000 == 0:
+                title = doc['title']
+                print("At %s, doc number %s" % (title, count))
+            count += 1
+            doc_id = doc['_id']
+            try:
+                output = extractWikiLinksFromDoc(doc)
+                doc_to_from = createDocToFromList(doc['title'],
+                                                  output['links'],
+                                                  lambda x: filter(None, x))
+                if doc_to_from:
+                    wikiLinkMDBCon.insert(doc_to_from)
+            except KeyboardInterrupt:
+                raise KeyboardInterrupt
+            except:
+                print('Error encounterd at document %s' % count)
+                err_name = sys.exc_info()[1]
+                print err_name
+                new_error = {'mdb_id':doc['_id'],
+                             'title':doc['title'],
+                             'err_type':sys.exc_info()[0],
+                             'err_msg':sys.exc_info()[1]}
+                errs.append(new_error)
+    finally:
+        with open(pkl_file_name, 'w') as f1:
+            pickle.dump(errs, f1)
         
 
 if __name__=="__main__":

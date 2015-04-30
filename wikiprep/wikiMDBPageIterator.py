@@ -9,10 +9,10 @@ class WikiPageIteratorAll:
     Connects to Wiki MDB; Creates a Cursor itterable over all docs up to limit;
     """
 
-    def __init__(self, limit=100, skip=0,
-                 no_cursor_timeout=False):
+    def __init__(self, limit=100, skip=0):
         self.conn = getWikiMDBConn()
-        self.cursor = self.conn.query(limit=limit, skip=0)
+        self.cursor = self.conn.query(limit=limit, skip=skip,
+                                      no_cursor_timeout=True)
         self.current = 0
         self.high = self.cursor.count(with_limit_and_skip=True)
         

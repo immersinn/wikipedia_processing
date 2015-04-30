@@ -36,7 +36,7 @@ def main(max_pages):
         print("Making connection to Mongo Wiki DB, link coll...")
         wikiLinkMDBCon = getWikiMDBConn(coll='wikiToWikiLinks')
         print("Iterating over documents for analysis...")
-        wi = WikiPageIterator(limit=max_pages, no_cursor_timeout=True)
+        wi = WikiPageIterator(limit=max_pages)
         count = 0
         for doc in wi:
             if count % 1000 == 0:

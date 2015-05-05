@@ -142,14 +142,19 @@ while (Q>Q0), %Outer loop until improvement not found inside
             nodecontributions(:,ig)=...
                 BMultiply((testgroups==gpart(ig))',A,1:length(A),L);
         end
+
         glookup(gpart)=1:length(gpart);
+
         currcontribindex=[1:N]'+(glookup(testgroups)'-1)*N;
         currcontrib=nodecontributions(currcontribindex)+kk2m;
+
         nodecontributions=nodecontributions-...
             currcontrib*ones(1,length(gpart));
         nodecontributions(currcontribindex)=-999; %Ignore current placement
+
         nodecontributions=nodecontributions(indx,:); %Restrict to available nodes
         currcontrib=currcontrib(indx,:); %Restrict to available nodes
+
         maxvalue=max(max(nodecontributions)); %Identify best available switch
         [i,g]=find(nodecontributions==maxvalue);
         ii=ceil(length(i)*rand(1)); %break ties randomly

@@ -36,71 +36,127 @@ def KLNLoop(graph, scoreFunction, itt):
             times.append(nkl_out['time'])
 
 
-def mKL(groups, graph, indx, scoreFunc, contribFunc):
+## CODE HAS BEEN CHECKED
+def mKL(groups, A, indx, L, allow_make_new=True):
     """
 
-    """
-    group_names = numpy.unique(groups)
-    differences = numpy.diff(group_names)
-    cuts = len(numpy.unique(differences))
-    
-    num_nodes = graph.number_of_nodes()
-    num_edges = graph.number_of_edges()
-    
-    score = scoreFunc(groups, graph)
-    indx_orig = indx
-    score_prev = -9999
+    """    
+    n = A.shape[0]
+    k = A.sum(axis=1).reshape((n,))
+    kk2m = k * k / float(sum(k)) * L
+
+    groups = resetGroupNames(groups)
+    score = modularity(A, groups, L)
+    indx_orig = indx[:]
+    score_prev = -999
     num_iter = 0
+    
     # insert code for timing loops, code
 
     while score > score_prev:
-        score = score_prev
+        score_prev = score
         num_iter += 1
-        group_names_use = numpy.unique(groups[indx])
-        test_groups = groups
+        indx = indx_orig[:]
+        group_names = numpy.unique(groups[indx])
+        test_groups = groups.copy()
+        
+        while indx:            
+            node_contrib = numpy.zeros((n, len(group_names)))
+            for i, g in enumerate(group_names):
+                x = (test_groups == i).astype(int)
+                node_contrib[:,i] = bMultiply(x, A, range(n), L)
+            node_contrib = node_contrib.reshape((node_contrib.size,))            
 
-        while indx:
-            # need to clean this up; Should return nodes as row, groups as col
-            node_contrib_current = calcNodeContributions(graph,
-                                                         test_groups,
-                                                         group_names_use,
-                                                         contribCalc)
-            ## Purpose: determine which node will switch groups,
-            ## and where it will go
-            max_contrib = node_contrib_current.max()
-            
-            make_new = - node_contrib_current_group[i] > max_contrib
+            curr_contrib_index = (numpy.array(range(n)) * len(group_names)\
+                                  + test_groups).astype(int)
+            print curr_contrib_index
+            curr_contrib = node_contrib[curr_contrib_index] + kk2m
+
+            node_contrib = node_contrib -\
+                           numpy.repeat(curr_contrib, len(group_names))
+            node_contrib[curr_contrib_index] = -999
+            node_contrib = node_contrib.reshape((n, len(group_names)))
+
+            node_contrib = node_contrib[indx,]
+            curr_contrib = curr_contrib[indx,]
+
+            max_contrib = node_contrib.max()
+            make_new = max(-curr_contrib) >= max_contrib
+
             if make_new and allow_make_new:
-                ## Determine if any node's negative contribution to it's group
-                ## is larger in magnitude than max_contrib;
-                ## if so, move to its own group in leui of moving the previously
-                ## selected node
-            else:
-                i = numpy.where(node_contrib_current==max_contrib)
-                i = (numpy.array(i[0]).reshape(numpy.array(i[0]).size,),
-                    numpy.array(i[0]).reshape(numpy.array(i[0]).size,))
-                j = numpy.floor(len(i[0]) * numpy.random.uniform())
-                node_to_move = i[0][j]
-                group_to_move_to = i[1][j]
+                best_node = indx[numpy.random.choice(\
+                    numpy.where(-curr_contrib == max(-curr_contrib))[0])]
+                best_group = max(test_groups) + 1
+                group_names = numpy.resize(group_names,
+                                           group_names.size + 1)
+                group_names[-1] = best_group
+            else:    
+                (inds, grps) = numpy.where(node_contrib == max_contrib)
+                rand_tie_break = numpy.random.randint(0, len(inds))
+                best_node = indx[inds[rand_tie_break]]
+                best_group = grps[rand_tie_break]
 
-            testgroups[node_to_move] = group_to_move_to
-            indx.remove(node_to_move)
-            best_score = scoreFunc(graph, test_groups)
-            if best_score > score:
-                groups = test_groups
-                score = best_score
+            test_groups[best_node] = best_group
+            indx.remove(best_node)
+            new_score = modularity(A, test_groups, L)
+            if new_score > score:
+                groups = test_groups.copy()
+                score = new_score
 
-    score = scoreFunc(graph, groups)
+        groups = resetGroupNames(groups)
+
+    return groups, score
             
             
-            
-            
-                                                              
-            
+## CODE HAS BEEN CHECKED                                                             
+def modularity(A, groups, L):
+    """
+    Newman modularity.
+
+    :type A: numpy.array, 2d
+    :param graph: adjacency matrix
+
+    :type groups: numpy.array
+    :param groups: array of length n, where n = graph.number_of_nodes().
+    Indicates which nodes belong to which groups, where each node is assigned
+    an integer corresponding to the group index
+
+    :type L: float (or int, but force float)
+    :param L: lambda
+    """
+
+    L = float(L)
+    comms = numpy.unique(groups)
+    Q = 0
+    indx = range(A.shape[0])
+    for i in comms:
+        x = (groups==i).astype(int)
+        Q = Q + numpy.dot(x, bMultiply(x, A, indx, L))
+    Q = Q / A.sum()
+    return Q
+
+
+## CODE HAS BEEN CHECKED
+def bMultiply(x, A, indx, L):
+    """
+    :type x: numpy.array
+    :param x: column vector, len n, 1 if node is in the current group,
+    0 otherwise
+
+    :type A: numpy.array, 2d; consider switching to scipy.sparse
+    :param A: adjacency matrix
+    """
+    j = A.sum(axis=1)
+    jx = numpy.dot(j.reshape((1,10)), x) 
+    two_m = sum(j)
+    x2 = numpy.dot(A, x)
+    x3 = (L * jx / two_m) * j
+    v = x2 - x3
+    v = v[indx]
+    return v
             
     
-
-
+## CODE HAS BEEN CHECKED
 def spanSpace(n, max_groups):
     """
     Randomly assigns nodes to a random number of groups (less than
@@ -113,8 +169,10 @@ def spanSpace(n, max_groups):
     :param max groups: indicates the maximum number of groups the nodes
     are to be split into
     """
-    num_groups = numpy.ceil(numpy.random.uniform()*max_groups)
-    groups_index = numpy.random.randint(0, high=num_groups, size=n)
+    
+    groups_index = numpy.random.randint(1,
+                                        high=numpy.random.randint(2, max_groups + 1) + 1,
+                                        size=n)
     return groups_index
 
 
@@ -135,20 +193,7 @@ def reassignGroups(groups):
     return groups
 
 
-def calcNodeContributions():
-    nodecontributions=zeros(length(A),length(gpart));
-    for ig=1:length(gpart),
-        nodecontributions(:,ig)=...
-            BMultiply((testgroups==gpart(ig))',A,1:length(A),L);
-    end
-    glookup(gpart)=1:length(gpart);
-    currcontribindex=[1:N]'+(glookup(testgroups)'-1)*N;
-    currcontrib=nodecontributions(currcontribindex)+kk2m;
-    nodecontributions=nodecontributions-...
-        currcontrib*ones(1,length(gpart));
-    nodecontributions(currcontribindex)=-999; %Ignore current placement
-    nodecontributions=nodecontributions(indx,:); %Restrict to available nodes
-    currcontrib=currcontrib(indx,:); %Restrict to available nodes
+ 
     
 
 def main():

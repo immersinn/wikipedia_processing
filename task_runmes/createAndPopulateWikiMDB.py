@@ -6,7 +6,6 @@
 
 import sys
 
-sys.path.append('/Users/immersinn/Gits/')
 from dbinterface_python.dbconns import connectMon
 from wikipedia_processing.wikiprep.wikiXMLParse\
      import populateWikiMDB

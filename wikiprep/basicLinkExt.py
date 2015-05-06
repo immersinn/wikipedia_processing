@@ -1,9 +1,6 @@
 """See 'nlppipeline/test_files/runme_basicLinkExt.py' for example"""
 
-import sys
 import re
-
-sys.path.append('/Users/immersinn/Gits/')
 from wikipedia_processing.wikiprep import wikiDocProcess
 
 

@@ -16,6 +16,7 @@ class populateWikiMDB():
     def __init__(self, mdb_obj, file_path, max_count=-1):
         self.mdb_obj = mdb_obj
         self.fn = file_path
+        self.verbose = False
         self.createFileHandle()
         self.findFirstPage()
         self.eof = False
@@ -48,13 +49,15 @@ class populateWikiMDB():
 
 
     def mainProcess(self):
-        count = 0
-        while not self.eof and count != self.max_count:
-            pageInfo = self.getPage()
+        self.count = 0
+        while not self.eof and self.count != self.max_count:
+            self.getPage()
             if self.current_page:
+                if self.count % 10000 == 0:
+                    print(self.current_page[0])
                 self.parsePage()
                 self.insertPage()
-            count += 1
+            self.count += 1
 
 
     def getPage(self):
@@ -87,9 +90,11 @@ class populateWikiMDB():
 
     def encodePageTest(self):
         self.encoded = bson.BSON.encode({'text':self.current_page['dict']['revision']['text']},
-                                           True, UUID_SUBTYPE)
+                                           True)
+        #, UUID_SUBTYPE
         self.encoded_length = len(self.encoded)
-        print('Size of text: %s' % self.encoded_length)
+        if self.verbose:
+            print('Size of text: %s' % self.encoded_length)
 
 
     def insertPage(self):
@@ -97,10 +102,10 @@ class populateWikiMDB():
             print('Splitting text into sections...')
             self.splitParsedPageXML()
             for p in self.current_page:
-                ids = self.mdb_obj.MongoInsert(p, return_ids=True)
+                ids = self.mdb_obj.insert(p, return_ids=True)
                 
         else:
-            ids = self.mdb_obj.MongoInsert(self.current_page, return_ids=True)
+            ids = self.mdb_obj.insert(self.current_page, return_ids=True)
     
 
     def splitParsedPageXML(self):

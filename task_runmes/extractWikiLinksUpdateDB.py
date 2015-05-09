@@ -3,7 +3,6 @@ import sys
 import time
 import pickle
 
-sys.path.append('/Users/immersinn/Gits/')
 from wikipedia_processing.wikiprep.wikiMDBPageIterator \
      import WikiPageIterator, getWikiMDBConn
 from wikipedia_processing.wikiprep.basicLinkExt \
@@ -11,6 +10,8 @@ from wikipedia_processing.wikiprep.basicLinkExt \
 
 pkl_file_name = \
               '/Users/immersinn/Gits/wikipedia_processing/task_runmes/extractWikiLinksUpdateDB_errors.pkl'
+pkl_file_name = \
+	      '/srv/logs/extractWikiLinksUpdateDB_errors.pkl'
 
 
 def createDocToFromList(doc_name, doc_links, linkFilter):

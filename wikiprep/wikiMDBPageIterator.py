@@ -1,6 +1,4 @@
 
-import sys
-sys.path.append('/Users/immersinn/Gits/')
 from dbinterface_python.dbconns import connectMon
 
 
@@ -44,6 +42,10 @@ class WikiPageIterator(WikiPageIteratorAll):
                 if self.current==self.high:
                     raise StopIteration
                 doc = self.cursor.next()
+                if 'title' not in doc.keys():
+                    doc['title'] = doc['dict']['title']
+                if 'revision' not in doc.keys():
+                    doc['revision'] = doc['dict'].pop('revision')
                 if not badpage(doc):
                     good_doc = doc
                     good_doc_status = True
@@ -72,6 +74,7 @@ def badpage(doc):
     General check for if the document is a desirable one to
     do analysis with.
     """
+    
     if emptypage(doc):
         return True
     elif redirectpage(doc):

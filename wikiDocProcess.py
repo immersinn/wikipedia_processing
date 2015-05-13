@@ -1,7 +1,6 @@
 import sys
 import re
 
-sys.path.append('/Users/immersinn/Gits/')
 from nlppipeline.corpus_doc.nlpdocs import NLPPrepBasic
 
 BAD_HEADER_LIST = ['external links',

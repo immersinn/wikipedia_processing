@@ -178,4 +178,4 @@ def filepage(wikidoc):
 if __name__=="__main__":
     wi = WikiPageIterator()
     for doc in wi:
-        print doc['title']
+        print(doc['title'])

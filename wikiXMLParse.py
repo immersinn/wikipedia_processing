@@ -108,37 +108,6 @@ class populateWikiMDB():
             ids = self.mdb_obj.insert(self.current_page, return_ids=True)
     
 
-    def splitParsedPageXML(self):
-        """
-        Takes a parsed page dictionary, and divides it into several pieces.
-        Specifically, all page "meta data" (read: non-text data) is placed
-        in a single dictionary to be written to MDB, while the textual part
-        of the page is split into paragraphs
-        """
-        section_re_match = re.compile(r'^==(?!=)(.+)==$')
-        text = self.current_page['revision']['text']
-        title = self.current_page['title']
-        _id = self.current_page['id']
-        parsed_page_list = [self.current_page]
-        curcont = []
-        header = 'FrontMatter'
-        for t in text:
-            mat = re.match(section_re_match, t)
-            if mat:
-                parsed_page_list.append({'title':title, 'id':_id,
-                                       'header':header,
-                                       'content':curcont})
-                header = mat.groups()[0]
-                curcont = []
-            else:
-                curcont.append(t)
-        parsed_page_list.append({'title':title, 'id':_id,
-                                 'header':header,
-                                 'content':curcont})
-        total_sections = len(parsed_page_list)
-        print('Total number of sections for %s: %s' % (title, total_sections))
-        self.current_page = parsed_page_list
-
 
 def parsePageXML(pagexml, index=0, closing=None):
     """

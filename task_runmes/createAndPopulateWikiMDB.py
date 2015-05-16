@@ -7,12 +7,11 @@
 import sys
 
 from dbinterface_python.dbconns import connectMon
-from wikipedia_processing.wikiprep.wikiXMLParse\
-     import populateWikiMDB
+from wikipedia_processing.wikiXMLParse import populateWikiMDB
 
 
 default_wiki_xml_path = '/Users/immersinn/Data/WebDataDumps/enwiki-latest-pages-articles.xml'
-default_wiki_xml_path = '/srv/DataDumps/WebDataDumps/01enwiki-latest-pages-articles.xml'
+##default_wiki_xml_path = '/srv/DataDumps/WebDataDumps/01enwiki-latest-pages-articles.xml'
 
 def createAndReturnWikiMDB():
     wikimdb = connectMon.MongoConn()
@@ -35,7 +34,7 @@ def main():
 ##    file_path = input()
     file_path = ''
     file_path = file_path if file_path else default_wiki_xml_path
-    populateWikiMDB(wikimdb_handle, file_path, max_count=-1)
+    populateWikiMDB(wikimdb_handle, file_path, max_count=1000000)
 
 
 if __name__=="__main__":

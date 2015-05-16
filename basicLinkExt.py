@@ -1,7 +1,7 @@
 """See 'nlppipeline/test_files/runme_basicLinkExt.py' for example"""
 
 import re
-from wikipedia_processing.wikiprep import wikiDocProcess
+from wikipedia_processing import wikiDocProcess
 
 
 def extractWikiLinksFromDoc(doc):

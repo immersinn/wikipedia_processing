@@ -3,10 +3,8 @@ import sys
 import time
 import pickle
 
-from wikipedia_processing.wikiprep.wikiMDBPageIterator \
-     import WikiPageIterator, getWikiMDBConn
-from wikipedia_processing.wikiprep.basicLinkExt \
-     import extractWikiLinksFromDoc
+from wikipedia_processing.wikiMDBPageIterator import WikiPageIterator, getWikiMDBConn
+from wikipedia_processing.basicLinkExt import extractWikiLinksFromDoc
 
 pkl_file_name = \
               '/Users/immersinn/Gits/wikipedia_processing/task_runmes/extractWikiLinksUpdateDB_errors.pkl'

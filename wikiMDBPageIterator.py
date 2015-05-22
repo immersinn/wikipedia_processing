@@ -19,6 +19,10 @@ class WikiPageIteratorAll:
         return self
 
 
+    def reset(self):
+        self.cursor.rewind()
+
+
     def next(self):
         if self.current >= self.high:
             raise StopIteration

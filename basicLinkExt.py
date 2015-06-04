@@ -52,7 +52,7 @@ def extractWikiLinksFromDoc(doc):
     
 
 
-def extractWikiLinks(cont, link_list=[]):
+def extractWikiLinks(cont, link_list=[], text_only=False):
     """
     > Look through str/unicode for Wiki-to-Wiki links.
     > Account for imbedded links by counting the number of
@@ -96,7 +96,8 @@ def extractWikiLinks(cont, link_list=[]):
                         sub_cont = cont[start:i+1]
                         sub_cont, link_list =\
                                   processWikiLinks(sub_cont,
-                                                   link_list)
+                                                   link_list,
+                                                   text_only=text_only)
                         new_cont = ''.join([new_cont, sub_cont])
                         start = -1
             else:
@@ -107,7 +108,7 @@ def extractWikiLinks(cont, link_list=[]):
     return new_cont, link_list
 
 
-def processWikiLinks(cont, link_list):
+def processWikiLinks(cont, link_list, text_only=False):
     """
     > Parse link.
     > Identify link string.
@@ -145,20 +146,27 @@ def processWikiLinks(cont, link_list):
         elif cont[i] == '[':
             new_cont, link_list =\
                       extractWikiLinks(cont[start:],
-                                       link_list)
+                                       link_list,
+                                       text_only=text_only)
             text = new_cont
             i = len(cont)
         else:
             i += 1
+            
     if not link:
         link = cont
-    lType = getLinkType(link)
-    link = postProcessLink(link)
-    text = postProcessText(text, cont, split_count, start)
-    link_list.append({'link':link,
-                      'text':text,
-                      'lType':lType})
-    return text, link_list
+        
+    if text_only:
+        text = postProcessText(text, cont, split_count, start)
+        return(text, [])
+    else:
+        lType = getLinkType(link)
+        link = postProcessLink(link)
+        text = postProcessText(text, cont, split_count, start)
+        link_list.append({'link':link,
+                          'text':text,
+                          'lType':lType})
+        return(text, link_list)
 
 
 def getLinkType(link):

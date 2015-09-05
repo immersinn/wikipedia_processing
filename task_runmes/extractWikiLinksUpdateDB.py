@@ -4,12 +4,21 @@ import time
 import pickle
 
 from wikipedia_processing.wikiMDBPageIterator import WikiPageIterator, getWikiMDBConn
-from wikipedia_processing.basicLinkExt import extractWikiLinksFromDoc
+##from wikipedia_processing.basicLinkExt import extractWikiLinksFromDoc
 
+from wikipedia_processing import basicLinkExt
+
+sys.path.append('/home/immersinn/gdrive/Analytics/wiki_analytics/comparitive_clustering/python_code')
+import wikiWord2VecUtil
+
+
+
+##pkl_file_name = \
+##              '/Users/immersinn/Gits/wikipedia_processing/task_runmes/extractWikiLinksUpdateDB_errors.pkl'
+##pkl_file_name = \
+##	      '/srv/logs/extractWikiLinksUpdateDB_errors.pkl'
 pkl_file_name = \
-              '/Users/immersinn/Gits/wikipedia_processing/task_runmes/extractWikiLinksUpdateDB_errors.pkl'
-pkl_file_name = \
-	      '/srv/logs/extractWikiLinksUpdateDB_errors.pkl'
+              '/home/immersinn/Data/logs/extractWikiLinksUpdateDB_errors.pkl'
 
 
 def createDocToFromList(doc_name, doc_links, linkFilter):
@@ -17,7 +26,7 @@ def createDocToFromList(doc_name, doc_links, linkFilter):
 
     """
     to_from_info = []
-    for section_name,section_links in doc_links.items():
+    for section_name, section_links in doc_links.items():
         from_page = {'article':doc_name,
                      'section':section_name}
         links = linkFilter(section_links)
@@ -26,7 +35,21 @@ def createDocToFromList(doc_name, doc_links, linkFilter):
                                  'to_page':link['link'],
                                  'text':link['text'],
                                  'lType':link['lType']})
+
+    for li in doc_links:
+        from_page = {''}
     return to_from_info
+
+
+def linksFromDoc(doc):
+    '''
+    '''
+    article = wikiWord2VecUtil.extractWikiContent(doc['revision']['text'])
+    article = wikiWord2VecUtil.removeRefs(article)
+    article = wikiWord2VecUtil.simpleSectionSplit(article)
+    output = basicLinkExt.extractWikiLinksFromDoc({'title' : doc['title'],
+                                                    'content' : article})
+    return(output)
 
 
 def main(max_pages):
@@ -44,8 +67,9 @@ def main(max_pages):
             count += 1
             doc_id = doc['_id']
             try:
-                output = extractWikiLinksFromDoc(doc)
-                doc_to_from = createDocToFromList(doc['title'],
+                output = linksFromDoc(doc)
+                output['title'] = title
+                doc_to_from = createDocToFromList(output['title'],
                                                   output['links'],
                                                   lambda x: filter(None, x))
                 if doc_to_from:

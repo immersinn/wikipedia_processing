@@ -1,5 +1,6 @@
 """See 'nlppipeline/test_files/runme_basicLinkExt.py' for example"""
 
+import sys
 import re
 from wikipedia_processing import wikiDocProcess
 
@@ -29,18 +30,15 @@ def extractWikiLinksFromDoc(doc):
 
     :type doc: str, unicode
     :param doc: a Wikipedia article
-
     :rtype: dict
     :rparam: see above
     """
     global title
     title = doc['title']
-    
-    parsed = wikiDocProcess.splitParsedPage(doc, verbose=False)
-    filtered = wikiDocProcess.filterSections(parsed)
+    content = doc['content']
     sec_cont_dict = {}
     sec_link_dict = {}
-    for section in filtered:
+    for section in content:
         new_content, new_links = extractWikiLinks(section['content'],
                                                   link_list = [])
         sec_cont_dict[section['header']] = new_content

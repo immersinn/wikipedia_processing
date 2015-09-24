@@ -32,7 +32,7 @@ class WikiPageIteratorAll:
 
 class WikiPageIterator(WikiPageIteratorAll):
     """
-    Performes same function as 'WikiPageIteratorAll', but
+    Performs same function as 'WikiPageIteratorAll', but
     filters out pages deemed to be not of interest.
     """
 
